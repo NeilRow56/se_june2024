@@ -16,8 +16,12 @@ import {
 import { Button } from "../ui/button";
 import { CardWrapper } from "./CardWrapper";
 import { LoginSchema } from "@/schemas";
+import { PasswordInput } from "./PasswordInput";
+import { Loader2, LogIn } from "lucide-react";
+import { useTransition } from "react";
 
 export const LoginForm = () => {
+  const [isPending, startTransition] = useTransition();
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -33,7 +37,7 @@ export const LoginForm = () => {
     <CardWrapper
       headerLabel="Welcome back"
       backButtonLabel="Don't have an account?"
-      backButtonHref="/auth/register"
+      backButtonHref="/auth/sign-up"
     >
       <Form {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
@@ -62,7 +66,7 @@ export const LoginForm = () => {
                 <FormItem>
                   <FormLabel className="flex w-full">Password</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="******" type="password" />
+                    <PasswordInput {...field} placeholder="Password" />
                   </FormControl>
 
                   <FormMessage />
@@ -70,8 +74,16 @@ export const LoginForm = () => {
               )}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="max-w-[150px]" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4" /> Processing
+              </>
+            ) : (
+              <>
+                <LogIn className="mr-2 h-4 w-4" /> Login
+              </>
+            )}
           </Button>
         </form>
       </Form>

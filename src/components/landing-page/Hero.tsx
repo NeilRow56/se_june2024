@@ -5,6 +5,7 @@ import React from "react";
 
 import { Computer } from "lucide-react";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -38,8 +39,23 @@ const Hero = () => {
                   etc;.
                 </p>
               </div>
-              <div className="mx-auto mt-10 flex max-w-sm justify-center">
-                Sign In Button
+              <div className="-col mx-auto mt-10 flex max-w-sm flex-col justify-center space-y-4">
+                <div className="mx-auto flex flex-col space-y-4">
+                  <p>Already Have an account?</p>
+                  <div className="mx-auto flex flex-col space-y-4">
+                    <Button asChild className="w-[120px]">
+                      <Link href="/auth/sign-in">Sign in</Link>
+                    </Button>
+                    <p>Create an account?</p>
+                    <Button
+                      variant="outline"
+                      className="w-[120px] bg-slate-200 text-primary"
+                      asChild
+                    >
+                      <Link href="/auth/sign-up">Sign up</Link>
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
