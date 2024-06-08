@@ -15,13 +15,23 @@ import {
 
 import { Button } from "../ui/button";
 import { CardWrapper } from "./CardWrapper";
-import { LoginSchema } from "@/schemas";
-import { PasswordInput } from "./PasswordInput";
-import { Loader2, LogIn } from "lucide-react";
-import { useTransition } from "react";
 
-export const LoginForm = () => {
+import { PasswordInput } from "./PasswordInput";
+import { Loader2, LogIn, MailIcon } from "lucide-react";
+
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { signIn } from "next-auth/react";
+import { toast } from "sonner";
+import { LoginSchema } from "@/schemas";
+
+interface LoginFormProps {
+  callbackUrl?: string;
+}
+
+export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -30,9 +40,24 @@ export const LoginForm = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
-    console.log(values);
+  const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
+    const result = await signIn("credentials", {
+      redirect: false,
+      username: data.email,
+      password: data.password,
+    });
+
+    if (!result?.ok) {
+      toast.error(result?.error);
+      return;
+    }
+    startTransition(() => {
+      // router.push(callbackUrl ? callbackUrl : '/dashboard')
+      router.push("/dashboard");
+    });
+    toast.success("Welcome To WpAccPac");
   };
+
   return (
     <CardWrapper
       headerLabel="Welcome back"
@@ -40,19 +65,25 @@ export const LoginForm = () => {
       backButtonHref="/auth/sign-up"
     >
       <Form {...form}>
-        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <form className=" space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className=" space-y-4">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex w-full">Email</FormLabel>
+                  <FormLabel htmlFor="email" className="flex w-full">
+                    Email
+                  </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       placeholder="john.doe@example.com"
                       type="email"
+                      id="email"
+                      name="email"
+                      disabled={isPending}
+                      suffix={<MailIcon />}
                     />
                   </FormControl>
                   <FormMessage />
@@ -66,7 +97,11 @@ export const LoginForm = () => {
                 <FormItem>
                   <FormLabel className="flex w-full">Password</FormLabel>
                   <FormControl>
-                    <PasswordInput {...field} placeholder="Password" />
+                    <PasswordInput
+                      {...field}
+                      placeholder="********"
+                      disabled={isPending}
+                    />
                   </FormControl>
 
                   <FormMessage />
